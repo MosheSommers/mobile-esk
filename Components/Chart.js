@@ -1,29 +1,40 @@
 import React, { Component } from 'react';
 import {  View, Text, StyleSheet} from 'react-native';
-import Times from './../Utilities/Times';
 import Row from './Row';
+import InputRow from './InputRow';
 
 export default class Chart extends Component{
-    constructor(props){
-        super(props);
-        
-        this.getTimes();
-    }  
+   
       
  render(){
         const rows = [];
-            for (const key in this.state) {
-                if (this.state.hasOwnProperty(key)) {
-                    if (this.state.key !== null) {
-                        rows.push( <Row key={key} label={key} time={this.state[key]}/>);
+            if(!this.props.showSettings){
+                for (const key in this.props.times) {
+                    if (this.props.times.hasOwnProperty(key)) {
+                        if (this.props.times.key !== null) {
+                            rows.push( <Row key={key} label={key} time={this.props.times[key]}/>);
+                        }
                     }
                 }
+            }else{
+                rows.push(<InputRow 
+                            key='{key}' 
+                            label='Mincha' 
+                            time='10'
+                            onSubmitEditing={this.props.onSubmitEditing}
+                        />);
+                rows.push(<InputRow 
+                            key='{key2}' 
+                            label='Candle Lighting' 
+                            time='30'
+                            onSubmitEditing={this.props.onSubmitEditing}
+                        />);
             }
-
-      return(
-        <View style={this.styles.chart}>
-            {rows}
-        </View>
+           
+      return(  
+                    <View style={this.styles.chart}>
+                        {rows}
+                    </View>
       );
   }
 
@@ -36,29 +47,6 @@ export default class Chart extends Component{
         color: '#adffff'
     }
   });
-
-
-    setTimes(data, thisChart) {
-        const myTimes = new Times();
-        const sunrise = new Date(Date.parse(data.results.sunrise)).toLocaleTimeString();
-        const sunset = new Date(Date.parse(data.results.sunset)).toLocaleTimeString();
-        const candlelighting = myTimes.getCandleLighting(Date.parse(data.results.sunset));
-        const { plag, latestCandle, mincha } = myTimes.getPlag(Date.parse(data.results.sunrise), Date.parse(data.results.sunset));
-        thisChart.setState({
-            Candlelighting: candlelighting,
-            Plag:plag,
-            LatestCandle: latestCandle,
-            Mincha:mincha
-        });
-    } 
-
-    getTimes(){
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(new Times().getSunriseSunset.bind(this));
-        } else {
-        console.log("Geolocation is not supported by this browser.");
-        }
-    }
     
 }
 

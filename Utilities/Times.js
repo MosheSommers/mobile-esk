@@ -12,18 +12,15 @@ export default class Times{
         return canLight;
     }
 
-    getPlag(sunrise, sunset){
+    getPlag(sunrise, sunset,minchaTime, candleTime){
         //Get MS per halachic hour
         const msPerHHour = (sunset - sunrise)  / 12;
         
         //Get plag - 1 1/4 halachic hours b4 sunset
         const msPlagB4Sunset = msPerHHour + (msPerHHour / 4);
-        const plag = this.formatAMPM(new Date(sunset - msPlagB4Sunset));
-        const latestCandle = this.formatAMPM(new Date(60000 * 30 + sunset - msPlagB4Sunset ));
-        const mincha = this.formatAMPM(new Date(sunset - msPlagB4Sunset - (60000 * 10 )));
+        const plagInMs = sunset - msPlagB4Sunset;
         
-        
-        return {plag, latestCandle, mincha};
+        return this.getActualTimes(plagInMs,minchaTime, candleTime);
     }
 
 
@@ -54,5 +51,14 @@ export default class Times{
         minutes = minutes < 10 ? '0'+minutes : minutes;
         var strTime = hours + ':' + minutes + ' ' + ampm;
         return strTime;
-      }
+    }
+
+    getActualTimes(plagInMs,minchaTime, candleTime){
+        const plag = this.formatAMPM(new Date(plagInMs));
+        const latestCandle = this.formatAMPM(new Date(60000 * candleTime + plagInMs ));
+        const mincha = this.formatAMPM(new Date(plagInMs - (60000 * minchaTime )));
+        
+        
+        return {plag, latestCandle, mincha, plagInMs}
+    }
 }
