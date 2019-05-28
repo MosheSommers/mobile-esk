@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, View, Text, StyleSheet, Alert} from 'react-native';
+import { AppRegistry, View, Text, StyleSheet, Alert, AsyncStorage} from 'react-native';
 import HeaderFooter from './Components/HeaderFooter';
 import Chart from './Components/Chart';
 import Times from './Utilities/Times';
@@ -11,11 +11,7 @@ export default class App extends Component{
     super(props);
     this.state = { 
       showSettings:false,
-      settingTimes:{
-        minchaTime:10,
-        candleLightingTime:30
-      }
-    
+      settingTimes:this.getSettingTimes()
     };
     this.getTimes();
   }
@@ -38,7 +34,31 @@ export default class App extends Component{
       );
   }
 
-
+getSettingTimes(){
+  let minchaTime = 10;
+  let clTime = 30;
+  AsyncStorage.getItem('Mincha').then((value)=>{
+    Alert.alert(value);
+    if(value){
+      minchaTime = value;
+    }
+  });
+  
+  AsyncStorage.getItem('Cnadle Lighting').then((value)=>{
+    Alert.alert(value);
+    if(value){
+      clTime = value;
+    }
+  });
+  return {
+    minchaTime:minchaTime,
+    candleLightingTime:clTime
+  }
+  // return {
+  //   minchaTime:10,
+  //   candleLightingTime:30
+  // }
+}
   toggleSettings(){
     this.setState({
       showSettings: !this.state.showSettings
@@ -67,13 +87,21 @@ export default class App extends Component{
       if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(new Times().getSunriseSunset.bind(this));
       } else {
-      console.log("Geolocation is not supported by this browser.");
+      console.log("Geolocation is not supported by this device.");
       }
   }
 
   submitSettings(event, label){
     const isMincha = label == 'Mincha';
     const beforeAfter = isMincha ? 'before' : 'after';
+    AsyncStorage.setItem(label,event.nativeEvent.text ).then(()=>{
+      AsyncStorage.getItem(label).then((value)=>{
+          Alert.alert(value);
+        });   
+    }
+
+   );
+    
     Alert.alert(
       `You're ${label} time is ${event.nativeEvent.text} minutes ${beforeAfter} Plag!`
     );
