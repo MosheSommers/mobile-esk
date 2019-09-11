@@ -9,7 +9,6 @@ export default class InputRow extends Component{
       return(
         <View > 
             <Text style={this.styles.row}>{this.props.label} : </Text>
-            <Text>Hello</Text>
             <TextInput  
               id='sss'
               style={this.styles.input} 

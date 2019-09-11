@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
-import { AppRegistry, View, Text, StyleSheet, Alert, AsyncStorage} from 'react-native';
+import {  View, Alert, AsyncStorage} from 'react-native';
 import HeaderFooter from './Components/HeaderFooter';
 import Chart from './Components/Chart';
 import Times from './Utilities/Times';
-
-
 
 export default class App extends Component{
   constructor(props){
     super(props);
     this.state = { 
       showSettings:false,
-      settingTimes:this.getSettingTimes()
+      settingTimes:{
+        minchaTime:10,
+        candleLightingTime:30
+      }
     };
     this.getTimes();
+    this.getSettingTimes()
   }
 
   render(){
@@ -35,29 +37,24 @@ export default class App extends Component{
   }
 
 getSettingTimes(){
-  let minchaTime = 10;
-  let clTime = 30;
   AsyncStorage.getItem('Mincha').then((value)=>{
-    Alert.alert(value);
     if(value){
-      minchaTime = value;
+      this.setState({settingTimes:{
+        minchaTime:Number(value),
+        candleLightingTime :this.state.settingTimes.candleLightingTime
+      }});
+      
     }
   });
   
-  AsyncStorage.getItem('Cnadle Lighting').then((value)=>{
-    Alert.alert(value);
+  AsyncStorage.getItem('Candle Lighting').then((value)=>{
     if(value){
-      clTime = value;
+      this.setState({settingTimes:{
+        minchaTime:this.state.settingTimes.candleLightingTime,
+        candleLightingTime :Number(value)
+      }});
     }
-  });
-  return {
-    minchaTime:minchaTime,
-    candleLightingTime:clTime
-  }
-  // return {
-  //   minchaTime:10,
-  //   candleLightingTime:30
-  // }
+  }); 
 }
   toggleSettings(){
     this.setState({
@@ -96,15 +93,14 @@ getSettingTimes(){
     const beforeAfter = isMincha ? 'before' : 'after';
     AsyncStorage.setItem(label,event.nativeEvent.text ).then(()=>{
       AsyncStorage.getItem(label).then((value)=>{
-          Alert.alert(value);
+          Alert.alert(
+            `You're ${label} time is ${value} minutes ${beforeAfter} Plag!`
+          );
         });   
     }
 
    );
     
-    Alert.alert(
-      `You're ${label} time is ${event.nativeEvent.text} minutes ${beforeAfter} Plag!`
-    );
     const minchaTime = isMincha ? Number(event.nativeEvent.text) : this.state.settingTimes.minchaTime;
     const candleLightingTime = !isMincha ? Number(event.nativeEvent.text) : this.state.settingTimes.candleLightingTime;
 
@@ -116,7 +112,11 @@ getSettingTimes(){
           Plag:this.state.times.Plag,
           LatestCandle: latestCandle,
           Mincha:mincha
-        } 
+        },settingTimes:{
+          minchaTime,
+          candleLightingTime
+        },
+        showSettings:false
     });
   }
   
